@@ -23,8 +23,10 @@ FEEDS = [
  ("Sports","MLB",'MLB when:2d',6),
  ("Sports","NBA",'NBA when:2d',6),
  ("Sports","NHL",'NHL when:2d',6),
+ ("Sports","MMA",'"UFC" MMA when:3d',7),
+ ("Sports","MMA",'"PFL" mixed martial arts when:7d',4),
 ]
-LIMITS = {"Cape Breton":13,"Nova Scotia":10,"Canada":10,"World":10,"Business":8,"Health":8,"Sports":23}
+LIMITS = {"Cape Breton":13,"Nova Scotia":10,"Canada":10,"World":10,"Business":8,"Health":8,"Sports":30}
 def clean(s):
  return re.sub(r"\s+"," ",html.unescape(re.sub(r"<[^>]*>"," ",s or ""))).strip()
 def main():
@@ -62,6 +64,17 @@ def main():
   selection=grouped[section]
   selection.sort(key=lambda x:x["published"],reverse=True)
   if not selection:selection=[a for a in old.get("articles",[]) if a.get("category")==section]
+  if section=="Sports":
+   # Surface every sport (including MMA) instead of letting one busy league crowd others out.
+   topics=["Cape Breton Eagles","Boston Bruins","MMA","NHL","NFL","MLB","NBA"]
+   balanced=[]
+   for round_index in range(4):
+    for topic in topics:
+     subset=[a for a in selection if a.get("topic")==topic]
+     if len(subset)>round_index:
+      balanced.append(subset[round_index])
+   used={a["id"] for a in balanced}
+   selection=balanced+[a for a in selection if a["id"] not in used]
   articles.extend(selection[:limit])
  DEST.write_text(json.dumps({"updated_at":datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00","Z"),"edition_status":"live" if success>=len(FEEDS)*0.6 else "partial","note":"Public RSS headline metadata and outbound publisher links; check original sources for details.","articles":articles},ensure_ascii=False,indent=2)+"\n")
  print("Updated",len(articles),"headlines from",success,"feeds")
