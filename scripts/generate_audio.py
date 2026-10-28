@@ -13,6 +13,7 @@ from pathlib import Path
 
 import numpy as np
 import soundfile as sf
+import imageio_ffmpeg
 from kokoro_onnx import Kokoro
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -93,7 +94,7 @@ def main():
         wav = Path(tmp) / "briefing.wav"
         sf.write(str(wav), np.concatenate(segments), sample_rate)
         subprocess.run(
-            ["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
+            [imageio_ffmpeg.get_ffmpeg_exe(), "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
              "-i", str(wav), "-codec:a", "libmp3lame", "-b:a", "80k", "-ac", "1",
              str(AUDIO)],
             check=True,
