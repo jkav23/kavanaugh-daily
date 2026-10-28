@@ -1,0 +1,17 @@
+{
+  "updated_at": "2026-10-28T11:00:00Z",
+  "edition_status": "starter",
+  "note": "Starter edition. The first successful GitHub Actions run will collect recent headlines.",
+  "articles": [
+    {
+      "id": "starter1",
+      "category": "Cape Breton",
+      "topic": "Local",
+      "title": "Welcome to The Kavanaugh Daily — local news, Canada, world and sports",
+      "source": "The Kavanaugh Daily",
+      "url": "https://www.cbc.ca/news/canada/nova-scotia",
+      "published": "2026-10-28T11:00:00Z",
+      "summary": "This starter item will be replaced by live RSS headlines after the first scheduled update."
+    }
+  ]
+}
