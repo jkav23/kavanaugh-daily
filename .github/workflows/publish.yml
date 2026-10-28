@@ -27,7 +27,7 @@ jobs:
       - name: Collect public news feeds
         run: python scripts/update_news.py
       - name: Install neural speech engine
-        run: python -m pip install --disable-pip-version-check "kokoro-onnx>=0.4,<2" soundfile
+        run: python -m pip install --disable-pip-version-check "kokoro-onnx>=0.4,<2" soundfile imageio-ffmpeg
       - name: Cache neural speech model
         uses: actions/cache@v4
         with:
