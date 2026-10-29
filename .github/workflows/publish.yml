@@ -3,9 +3,18 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Two local publishing windows, each with a backup attempt because GitHub's
+  # schedule event is best-effort and may be delayed or dropped.
+  # The IANA timezone also follows Nova Scotia daylight-saving changes.
   schedule:
-    - cron: '35 9 * * *'
-    - cron: '10 18 * * *'
+    - cron: '17 5 * * *'
+      timezone: "America/Halifax"
+    - cron: '41 6 * * *'
+      timezone: "America/Halifax"
+    - cron: '13 14 * * *'
+      timezone: "America/Halifax"
+    - cron: '29 15 * * *'
+      timezone: "America/Halifax"
 permissions:
   contents: read
   pages: write
