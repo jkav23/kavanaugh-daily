@@ -30,6 +30,7 @@ SECTION_PLAN = (
     ("Canada", "Across Canada now.", 3),
     ("World", "Here are some of the international headlines.", 3),
     ("Business", "In business and the economy.", 2),
+    ("Technology", "Now the latest from technology, including artificial intelligence and new devices.", 3),
     ("Health", "Turning to health news.", 2),
     ("Sports", "And finally, in sports, including the latest in hockey, football, and mixed martial arts.", 7),
 )
