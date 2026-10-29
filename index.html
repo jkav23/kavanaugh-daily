@@ -114,12 +114,43 @@
       player.addEventListener('pause',()=>{if(player.currentTime>0&&!player.ended)status.textContent='Briefing paused. Press play to resume.'});
       player.addEventListener('ended',()=>{status.textContent='That concludes your audio headlines. Thanks for listening.'});
     }
-    async function refreshEdition(){let btn=$('refresh-btn');btn.disabled=true;btn.textContent='Checking…';try{let r=await fetch('./news.json?fresh='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('No feed');let next=await r.json();if(!Array.isArray(next.articles)||!next.articles.length)throw new Error('Empty edition');const changed=next.updated_at!==data.updated_at;data=next;render();if(changed&&$('audio-player').paused){$('audio-player').src='./briefing.mp3?edition='+encodeURIComponent(data.updated_at);$('audio-player').load()}toast(changed?'Latest published edition loaded.':'You already have the latest published edition.')}catch{toast('Unable to check the published edition. Open this site online to refresh.')}finally{btn.disabled=false;btn.textContent='↻ Check edition'}}
+    let lastEditionCheck=0;
+    async function refreshEdition(quiet=false){
+      const now=Date.now();
+      if(quiet && now-lastEditionCheck<90000)return;
+      const btn=$('refresh-btn');
+      if(btn.disabled)return;
+      lastEditionCheck=now;
+      btn.disabled=true;btn.textContent='Checking…';
+      try{
+        const r=await fetch('./news.json?fresh='+Date.now(),{cache:'no-store'});
+        if(!r.ok)throw new Error('No feed');
+        const next=await r.json();
+        if(!Array.isArray(next.articles)||!next.articles.length)throw new Error('Empty edition');
+        const changed=next.updated_at!==data.updated_at;
+        data=next;render();
+        if(changed&&$('audio-player').paused){
+          $('audio-player').src='./briefing.mp3?edition='+encodeURIComponent(data.updated_at);
+          $('audio-player').load();
+        }
+        if(!quiet)toast(changed?'Latest published edition loaded.':'You already have the latest published edition.');
+        else if(changed)toast('New edition loaded automatically.');
+      }catch(e){
+        if(!quiet)toast('Unable to check the published edition. Open this site online to refresh.');
+      }finally{
+        btn.disabled=false;btn.textContent='↻ Check edition';
+      }
+    }
     document.addEventListener('click',evt=>{const nav=evt.target.closest('[data-section]');if(nav){setSection(nav.dataset.section);return}const save=evt.target.closest('[data-save]');if(save){toggleSave(save.dataset.save);return}const sport=evt.target.closest('[data-sport]');if(sport){sportFilter=sport.dataset.sport;render();return}if(evt.target.closest('[data-prefs]'))showPrefs()});
     $('customize-btn').addEventListener('click',showPrefs);$('prefs-close').addEventListener('click',savePrefs);$('prefs-reset').addEventListener('click',()=>[...$('prefs-list').querySelectorAll('input')].forEach(input=>input.checked=true));$('search').addEventListener('input',e=>{query=e.target.value.trim();render()});$('refresh-btn').addEventListener('click',refreshEdition);initAudio();
     const now=new Date();$('small-clock').textContent=formatDate(now,{weekday:'long',day:'numeric',month:'long',year:'numeric'});const hour=Number(new Intl.DateTimeFormat('en-CA',{hour:'numeric',hourCycle:'h23',timeZone:'America/Halifax'}).format(now));$('edition-kicker').textContent=hour<12?'The Morning Edition':hour<17?'The Afternoon Edition':'The Evening Edition';render();weather();
     // Only look for an updated JSON edition when hosted via http(s), not in a file preview.
-    if(/^https?:$/.test(location.protocol))refreshEdition();
+    if(/^https?:$/.test(location.protocol)){
+      refreshEdition(true);
+      document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshEdition(true)});
+      window.addEventListener('focus',()=>refreshEdition(true));
+      setInterval(()=>{if(!document.hidden)refreshEdition(true)},15*60*1000);
+    }
   </script>
 </body>
 </html>
