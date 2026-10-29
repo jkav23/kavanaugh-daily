@@ -1,6 +1,6 @@
 # The Kavanaugh Daily — starter website
 
-A personal, mobile-friendly news homepage for Cape Breton, Nova Scotia, Canada, the world, business, health, and selected sports.
+A personal, mobile-friendly news homepage for Cape Breton, Nova Scotia, Canada, the world, business, technology, health, and selected sports.
 
 ## Preview without installing anything
 
@@ -23,18 +23,18 @@ Then visit `http://localhost:8000`.
 5. Once the job has completed, use the URL shown in **Settings → Pages**. The site should be at `https://YOUR-USERNAME.github.io/kavanaugh-daily/` (replace username).
 6. On your iPhone open it in Safari, choose **Share → Add to Home Screen**.
 
-The included GitHub Actions workflow attempts refreshes daily at **6:35 a.m.** and **3:10 p.m. Atlantic time** (subject to GitHub Actions queue delays and provider availability). GitHub can disable scheduled workflows after 60 days of inactivity in public repositories; check occasionally.
+The included GitHub Actions workflow attempts morning and afternoon updates (with backup attempts at **5:17 and 6:41 a.m.**, and **2:13 and 3:29 p.m.**, `America/Halifax` local time), subject to GitHub Actions queue delays and provider availability. GitHub can disable scheduled workflows after 60 days of inactivity in public repositories; check occasionally.
 
 ## What currently works
 
 - Responsive homepage and sections, keyword search, favourites, topic preference settings stored in your browser.
-- Read-aloud of selected headlines using the device's voice, including stop and pause/resume where supported.
+- A generated MP3 audio news briefing with a neural narrator, plus a text transcript.
 - Live current weather and a short forecast for New Waterford via Open-Meteo, requiring an online connection.
-- News retrieval from Google News RSS with dates, titles, sources, and links (which may route through Google News).
+- News retrieval from Google News RSS with dates, titles, sources, and links (which may route through Google News), including dedicated **Technology** coverage of AI, devices, cybersecurity, Canadian technology, and software.
 
 ## Planned, not implemented yet
 
-- Full human-quality 10-minute scripted radio broadcast and hosted audio.
+- A full 10-minute professionally scripted audio bulletin (the present audio is a shorter recorded headline roundup).
 - Automated relevance scoring and feedback-learning system across devices.
 - Photographs, licensed thumbnails, full-article summaries, scores integration, dedicated archives.
 
