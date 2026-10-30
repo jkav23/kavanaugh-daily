@@ -20,11 +20,11 @@ def needs_refresh():
         return True
 
     now = datetime.now(timezone.utc).astimezone(ZONE)
-    if now.hour < 3 or now.hour >= 21:
+    if now.hour < 5 or now.hour >= 21:
         print("Outside the morning and afternoon publishing windows.")
         return False
 
-    window_hour = 3 if now.hour < 12 else 12
+    window_hour = 5 if now.hour < 12 else 12
     window_start = datetime.combine(now.date(), time(window_hour, 0), tzinfo=ZONE)
     try:
         req = urllib.request.Request(
