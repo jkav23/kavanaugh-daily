@@ -3,17 +3,13 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-  # Two local publishing windows, each with a backup attempt because GitHub's
-  # schedule event is best-effort and may be delayed or dropped.
-  # The IANA timezone also follows Nova Scotia daylight-saving changes.
+  # GitHub cron events may arrive hours late or be dropped. Frequent lightweight
+  # retries check the published edition and publish only once per morning / afternoon.
+  # These schedules follow Nova Scotia daylight saving time.
   schedule:
-    - cron: '17 5 * * *'
+    - cron: '17 1-10 * * *'
       timezone: "America/Halifax"
-    - cron: '41 6 * * *'
-      timezone: "America/Halifax"
-    - cron: '13 14 * * *'
-      timezone: "America/Halifax"
-    - cron: '29 15 * * *'
+    - cron: '43 12-19 * * *'
       timezone: "America/Halifax"
 permissions:
   contents: read
@@ -23,7 +19,18 @@ concurrency:
   group: pages
   cancel-in-progress: false
 jobs:
+  check_freshness:
+    runs-on: ubuntu-latest
+    outputs:
+      refresh: ${{ steps.check.outputs.refresh }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check published edition for this morning or afternoon
+        id: check
+        run: python3 scripts/should_refresh.py
   publish:
+    needs: check_freshness
+    if: needs.check_freshness.outputs.refresh == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
