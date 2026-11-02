@@ -91,8 +91,22 @@
     function sectionMarkup(cat, all=false){let arr=bySection(cat).filter(searchable);if(section==='All'&&!query&&cat===leadArticle()?.category)arr=arr.filter(a=>a.id!==leadArticle().id);if(cat==='Sports'&&sportFilter!=='All')arr=arr.filter(a=>a.topic===sportFilter);if(!arr.length)return '';
       const display=all?arr:arr.slice(0,cat==='Sports'?6:3);
       return `<section class="section"><div class="section-heading"><h3 class="section-title"><small>${cat==='Cape Breton'?'Closer to home':'Your edition'}</small>${escapeHTML(cat)}</h3>${!all&&arr.length>display.length?`<button class="section-link" type="button" data-section="${escapeHTML(cat)}">View all ${arr.length} →</button>`:''}</div><div class="stories">${display.map(storyMarkup).join('')}</div></section>`}
-    function render(){renderNav();renderLead();$('edition-status-top').textContent=data.edition_status==='starter'?'Starter edition':data.edition_status==='partial'?'Partial feed update':'RSS edition';const update= data.edition_status==='starter'?'Preview edition (Oct 2026) · Automatic updates begin after publishing':`Last feed refresh: ${formatDate(data.updated_at,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})} Atlantic`;
-      $('edition-updated').textContent=update;
+    function editionIsLate(){
+      if(data.edition_status==='starter')return false;
+      const latest=new Date(data.updated_at),now=new Date();
+      if(!Number.isFinite(latest.getTime()))return false;
+      const dayFormat={year:'numeric',month:'2-digit',day:'2-digit'};
+      const today=formatDate(now,dayFormat),publishedDay=formatDate(latest,dayFormat);
+      const hour=d=>Number(new Intl.DateTimeFormat('en-CA',{timeZone:'America/Halifax',hour:'numeric',hourCycle:'h23'}).format(d));
+      return hour(now)>=8&&(publishedDay!==today||(hour(now)>=16&&hour(latest)<12));
+    }
+    function render(){renderNav();renderLead();
+      const delayed=editionIsLate();
+      const atlanticHour=Number(new Intl.DateTimeFormat('en-CA',{timeZone:'America/Halifax',hour:'numeric',hourCycle:'h23'}).format(new Date()));
+      $('edition-kicker').textContent=delayed?'Latest Available Edition':atlanticHour<12?'The Morning Edition':atlanticHour<17?'The Afternoon Edition':'The Evening Edition';
+      $('edition-status-top').textContent=delayed?'Update delayed':data.edition_status==='starter'?'Starter edition':data.edition_status==='partial'?'Partial feed update':'RSS edition';
+      const update=data.edition_status==='starter'?'Preview edition (Oct 2026) · Automatic updates begin after publishing':`Last feed refresh: ${formatDate(data.updated_at,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})} Atlantic`;
+      $('edition-updated').textContent=update+(delayed?' · Scheduled update delayed':'');
       const titles={'All':"A clearer view of today's news.",'Saved':'Your reading list.'};$('greeting').textContent=titles[section]||`Latest: ${section}`;
       $('stories-title').textContent=section==='All'?"Today's stories":section==='Saved'?'Saved stories':section+' headlines';
       $('sport-filters').hidden=section!=='Sports';if(section==='Sports')$('sport-filters').innerHTML=SPORT_TOPICS.map(t=>`<button class="filter-btn ${sportFilter===t?'active':''}" data-sport="${escapeHTML(t)}">${escapeHTML(t)}</button>`).join('');
@@ -143,7 +157,7 @@
     }
     document.addEventListener('click',evt=>{const nav=evt.target.closest('[data-section]');if(nav){setSection(nav.dataset.section);return}const save=evt.target.closest('[data-save]');if(save){toggleSave(save.dataset.save);return}const sport=evt.target.closest('[data-sport]');if(sport){sportFilter=sport.dataset.sport;render();return}if(evt.target.closest('[data-prefs]'))showPrefs()});
     $('customize-btn').addEventListener('click',showPrefs);$('prefs-close').addEventListener('click',savePrefs);$('prefs-reset').addEventListener('click',()=>[...$('prefs-list').querySelectorAll('input')].forEach(input=>input.checked=true));$('search').addEventListener('input',e=>{query=e.target.value.trim();render()});$('refresh-btn').addEventListener('click',refreshEdition);initAudio();
-    const now=new Date();$('small-clock').textContent=formatDate(now,{weekday:'long',day:'numeric',month:'long',year:'numeric'});const hour=Number(new Intl.DateTimeFormat('en-CA',{hour:'numeric',hourCycle:'h23',timeZone:'America/Halifax'}).format(now));$('edition-kicker').textContent=hour<12?'The Morning Edition':hour<17?'The Afternoon Edition':'The Evening Edition';render();weather();
+    const now=new Date();$('small-clock').textContent=formatDate(now,{weekday:'long',day:'numeric',month:'long',year:'numeric'});render();weather();
     // Only look for an updated JSON edition when hosted via http(s), not in a file preview.
     if(/^https?:$/.test(location.protocol)){
       refreshEdition(true);
